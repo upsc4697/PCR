@@ -1,141 +1,125 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Product Entry Form</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product Data Entry</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
+      padding: 16px;
+      background: #f2f2f2;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      background: #fff;
       padding: 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     label {
       display: block;
-      margin-top: 10px;
+      margin: 10px 0 5px;
+      font-weight: 600;
     }
     input, textarea {
       width: 100%;
       padding: 8px;
-      margin-top: 4px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-    button {
-      margin-top: 15px;
-      padding: 10px;
-      background: green;
+    .submit-btn {
+      margin-top: 20px;
+      background-color: #007BFF;
       color: white;
+      padding: 12px;
       border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
     }
-    .item-pair {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .item-pair input {
-      flex: 1;
+    .submit-btn:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
 
-  <h2>Product Entry Form</h2>
+<h2>Product Data Entry</h2>
 
-  <form id="entryForm">
-    <label>Product Name
-      <input type="text" name="productName" required>
-    </label>
-    <label>Product Code
-      <input type="text" name="productCode" required>
-    </label>
+<form id="data-form">
+  <label>Product Name</label>
+  <input type="text" name="Product Name">
 
-    <div id="itemList">
-      <div class="item-pair">
-        <input type="text" placeholder="Item" name="item">
-        <input type="number" placeholder="Weight" name="weight">
-      </div>
-    </div>
-    <button type="button" onclick="addItem()">+ Add Item</button>
+  <label>Product Code</label>
+  <input type="text" name="Product Code">
 
-    <label>Pantone Code
-      <input type="text" name="pantoneCode">
-    </label>
-    <label>RAL Code
-      <input type="text" name="ralCode">
-    </label>
-    <label>Total Weight
-      <input type="number" name="totalWeight" required>
-    </label>
-    <label>Application
-      <input type="text" name="application">
-    </label>
-    <label>Additional Info
-      <textarea name="additionalInfo"></textarea>
-    </label>
+  <label>Item Names (comma separated)</label>
+  <input type="text" name="Item">
 
-    <button type="submit">Submit</button>
-    <p id="statusMsg"></p>
-  </form>
+  <label>Item Weights (comma separated)</label>
+  <input type="text" name="Weight" id="weights" oninput="calculateTotalWeight()">
 
-  <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxTbnfqDrmq_Nee7TjH2bNIVH0TiOsE79D1irRmAtdCOaYfsPOx3wg24vOo0EG2Ud5bFg/exec';
+  <label>Total Weight (Auto)</label>
+  <input type="text" name="Total Weight" id="totalWeight" readonly>
 
-    const form = document.getElementById('entryForm');
-    const statusMsg = document.getElementById('statusMsg');
+  <label>Pantone Code</label>
+  <input type="text" name="Pantone Code">
 
-    function addItem() {
-      const div = document.createElement('div');
-      div.className = 'item-pair';
-      div.innerHTML = `
-        <input type="text" placeholder="Item" name="item">
-        <input type="number" placeholder="Weight" name="weight">
-      `;
-      document.getElementById('itemList').appendChild(div);
-    }
+  <label>Pantone Colour</label>
+  <input type="text" name="Pantone Colour">
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+  <label>RAL Code</label>
+  <input type="text" name="RAL Code">
 
-      const data = new FormData(form);
-      const items = [];
-      const weights = [];
+  <label>RAL Colour</label>
+  <input type="text" name="RAL Colour">
 
-      document.querySelectorAll('input[name="item"]').forEach(i => items.push(i.value));
-      document.querySelectorAll('input[name="weight"]').forEach(w => weights.push(w.value));
+  <label>Application</label>
+  <input type="text" name="Application">
 
-      const payload = {
-        productName: data.get("productName"),
-        productCode: data.get("productCode"),
-        items,
-        weights,
-        pantoneCode: data.get("pantoneCode"),
-        ralCode: data.get("ralCode"),
-        totalWeight: data.get("totalWeight"),
-        application: data.get("application"),
-        additionalInfo: data.get("additionalInfo")
-      };
+  <label>Additional Information</label>
+  <textarea name="Additional Information"></textarea>
 
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(response => response.text())
-      .then(msg => {
-        statusMsg.textContent = "✅ Submitted successfully!";
-        form.reset();
-        document.getElementById('itemList').innerHTML = `
-          <div class="item-pair">
-            <input type="text" placeholder="Item" name="item">
-            <input type="number" placeholder="Weight" name="weight">
-          </div>`;
-      })
-      .catch(err => {
-        console.error(err);
-        statusMsg.textContent = "❌ Submission failed. Try again.";
-      });
+  <button type="submit" class="submit-btn">Submit</button>
+</form>
+
+<script>
+  const form = document.getElementById("data-form");
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    fetch("https://script.google.com/macros/s/AKfycbxTbnfqDrmq_Nee7TjH2bNIVH0TiOsE79D1irRmAtdCOaYfsPOx3wg24vOo0EG2Ud5bFg/exec", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => response.text())
+    .then(result => {
+      alert("Form submitted successfully!");
+      form.reset();
+      document.getElementById("totalWeight").value = "";
+    })
+    .catch(error => {
+      alert("Error submitting form.");
+      console.error("Error:", error);
     });
-  </script>
+  });
+
+  function calculateTotalWeight() {
+    const weights = document.getElementById("weights").value
+      .split(",")
+      .map(w => parseFloat(w.trim()))
+      .filter(w => !isNaN(w));
+    const total = weights.reduce((a, b) => a + b, 0);
+    document.getElementById("totalWeight").value = total;
+  }
+</script>
 
 </body>
 </html>
