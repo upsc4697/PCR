@@ -1,79 +1,141 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Product Entry Form</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 15px;
+      font-family: sans-serif;
+      padding: 20px;
     }
-    input, textarea, button {
+    label {
       display: block;
+      margin-top: 10px;
+    }
+    input, textarea {
       width: 100%;
-      margin-bottom: 10px;
       padding: 8px;
-      font-size: 16px;
+      margin-top: 4px;
     }
     button {
-      background-color: #4CAF50;
+      margin-top: 15px;
+      padding: 10px;
+      background: green;
       color: white;
       border: none;
+    }
+    .item-pair {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .item-pair input {
+      flex: 1;
     }
   </style>
 </head>
 <body>
-  <h2>Enter Product Details</h2>
 
-  <form id="productForm">
-    <input type="text" name="productName" placeholder="Product Name" required />
-    <input type="text" name="productCode" placeholder="Product Code" required />
-    <textarea name="items" placeholder="Items (comma separated)" required></textarea>
-    <textarea name="weights" placeholder="Weights (comma separated)" required></textarea>
-    <input type="text" name="pantoneCode" placeholder="Pantone Code" />
-    <input type="text" name="ralCode" placeholder="RAL Code" />
-    <input type="text" name="totalWeight" placeholder="Total Weight" />
-    <input type="text" name="application" placeholder="Application" />
-    <textarea name="additionalInfo" placeholder="Additional Information"></textarea>
+  <h2>Product Entry Form</h2>
+
+  <form id="entryForm">
+    <label>Product Name
+      <input type="text" name="productName" required>
+    </label>
+    <label>Product Code
+      <input type="text" name="productCode" required>
+    </label>
+
+    <div id="itemList">
+      <div class="item-pair">
+        <input type="text" placeholder="Item" name="item">
+        <input type="number" placeholder="Weight" name="weight">
+      </div>
+    </div>
+    <button type="button" onclick="addItem()">+ Add Item</button>
+
+    <label>Pantone Code
+      <input type="text" name="pantoneCode">
+    </label>
+    <label>RAL Code
+      <input type="text" name="ralCode">
+    </label>
+    <label>Total Weight
+      <input type="number" name="totalWeight" required>
+    </label>
+    <label>Application
+      <input type="text" name="application">
+    </label>
+    <label>Additional Info
+      <textarea name="additionalInfo"></textarea>
+    </label>
 
     <button type="submit">Submit</button>
+    <p id="statusMsg"></p>
   </form>
 
-  <p id="response"></p>
-
   <script>
-    document.getElementById("productForm").addEventListener("submit", function (e) {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxTbnfqDrmq_Nee7TjH2bNIVH0TiOsE79D1irRmAtdCOaYfsPOx3wg24vOo0EG2Ud5bFg/exec';
+
+    const form = document.getElementById('entryForm');
+    const statusMsg = document.getElementById('statusMsg');
+
+    function addItem() {
+      const div = document.createElement('div');
+      div.className = 'item-pair';
+      div.innerHTML = `
+        <input type="text" placeholder="Item" name="item">
+        <input type="number" placeholder="Weight" name="weight">
+      `;
+      document.getElementById('itemList').appendChild(div);
+    }
+
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      const form = e.target;
-      const data = {
-        productName: form.productName.value,
-        productCode: form.productCode.value,
-        items: form.items.value.split(",").map(item => item.trim()),
-        weights: form.weights.value.split(",").map(weight => weight.trim()),
-        pantoneCode: form.pantoneCode.value,
-        ralCode: form.ralCode.value,
-        totalWeight: form.totalWeight.value,
-        application: form.application.value,
-        additionalInfo: form.additionalInfo.value
+      const data = new FormData(form);
+      const items = [];
+      const weights = [];
+
+      document.querySelectorAll('input[name="item"]').forEach(i => items.push(i.value));
+      document.querySelectorAll('input[name="weight"]').forEach(w => weights.push(w.value));
+
+      const payload = {
+        productName: data.get("productName"),
+        productCode: data.get("productCode"),
+        items,
+        weights,
+        pantoneCode: data.get("pantoneCode"),
+        ralCode: data.get("ralCode"),
+        totalWeight: data.get("totalWeight"),
+        application: data.get("application"),
+        additionalInfo: data.get("additionalInfo")
       };
 
-      fetch("https://script.google.com/macros/s/AKfycbxTbnfqDrmq_Nee7TjH2bNIVH0TiOsE79D1irRmAtdCOaYfsPOx3wg24vOo0EG2Ud5bFg/exec", {
-        method: "POST",
-        mode: "no-cors", // Remove this line if you're handling response
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
         headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data)
+          'Content-Type': 'application/json'
+        }
       })
-      .then(() => {
-        document.getElementById("response").textContent = "Submitted successfully!";
+      .then(response => response.text())
+      .then(msg => {
+        statusMsg.textContent = "✅ Submitted successfully!";
         form.reset();
+        document.getElementById('itemList').innerHTML = `
+          <div class="item-pair">
+            <input type="text" placeholder="Item" name="item">
+            <input type="number" placeholder="Weight" name="weight">
+          </div>`;
       })
-      .catch(() => {
-        document.getElementById("response").textContent = "Error while submitting!";
+      .catch(err => {
+        console.error(err);
+        statusMsg.textContent = "❌ Submission failed. Try again.";
       });
     });
   </script>
+
 </body>
 </html>
