@@ -2,43 +2,44 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Product Data Entry</title>
+  <title>Product Entry Form</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 16px;
       background: #f2f2f2;
+      padding: 20px;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
       color: #333;
     }
-    form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
     label {
+      margin-top: 10px;
       display: block;
-      margin: 10px 0 5px;
-      font-weight: 600;
+      font-weight: bold;
     }
     input, textarea {
       width: 100%;
       padding: 8px;
+      margin-top: 5px;
       border-radius: 6px;
       border: 1px solid #ccc;
     }
     .submit-btn {
-      margin-top: 20px;
       background-color: #007BFF;
       color: white;
-      padding: 12px;
       border: none;
+      padding: 12px;
       border-radius: 6px;
+      margin-top: 20px;
       cursor: pointer;
       width: 100%;
     }
@@ -64,7 +65,7 @@
   <label>Item Weights (comma separated)</label>
   <input type="text" name="Weight" id="weights" oninput="calculateTotalWeight()">
 
-  <label>Total Weight (Auto)</label>
+  <label>Total Weight (Auto Calculated)</label>
   <input type="text" name="Total Weight" id="totalWeight" readonly>
 
   <label>Pantone Code</label>
@@ -91,34 +92,38 @@
 <script>
   const form = document.getElementById("data-form");
 
-  form.addEventListener("submit", e => {
+  function calculateTotalWeight() {
+    const weightInput = document.getElementById("weights").value;
+    const weights = weightInput.split(',')
+      .map(w => parseFloat(w.trim()))
+      .filter(w => !isNaN(w));
+    const total = weights.reduce((sum, val) => sum + val, 0);
+    document.getElementById("totalWeight").value = total.toFixed(2);
+  }
+
+  form.addEventListener("submit", function(e) {
     e.preventDefault();
+
+    // Recalculate total weight before submission
+    calculateTotalWeight();
+
     const formData = new FormData(form);
 
     fetch("https://script.google.com/macros/s/AKfycbxTbnfqDrmq_Nee7TjH2bNIVH0TiOsE79D1irRmAtdCOaYfsPOx3wg24vOo0EG2Ud5bFg/exec", {
       method: "POST",
       body: formData
     })
-    .then(response => response.text())
-    .then(result => {
-      alert("Form submitted successfully!");
+    .then(res => res.text())
+    .then(data => {
+      alert("✅ Form submitted successfully!");
       form.reset();
       document.getElementById("totalWeight").value = "";
     })
     .catch(error => {
-      alert("Error submitting form.");
-      console.error("Error:", error);
+      console.error("Submission Error:", error);
+      alert("❌ Submission failed. Check Google Script deployment.");
     });
   });
-
-  function calculateTotalWeight() {
-    const weights = document.getElementById("weights").value
-      .split(",")
-      .map(w => parseFloat(w.trim()))
-      .filter(w => !isNaN(w));
-    const total = weights.reduce((a, b) => a + b, 0);
-    document.getElementById("totalWeight").value = total;
-  }
 </script>
 
 </body>
