@@ -1,130 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Product Entry Form</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      padding: 20px;
-    }
-    form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-    label {
-      margin-top: 10px;
-      display: block;
-      font-weight: bold;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    .submit-btn {
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 6px;
-      margin-top: 20px;
-      cursor: pointer;
-      width: 100%;
-    }
-    .submit-btn:hover {
-      background-color: #0056b3;
-    }
-  </style>
+  <title>Submit to Google Sheets</title>
 </head>
 <body>
+  <form id="myForm">
+    <input name="name" placeholder="Your Name" required /><br />
+    <input name="email" type="email" placeholder="Your Email" required /><br />
+    <textarea name="message" placeholder="Your Message"></textarea><br />
+    <button type="submit">Submit</button>
+  </form>
 
-<h2>Product Data Entry</h2>
+  <script>
+    document.getElementById('myForm').addEventListener('submit', function(e) {
+      e.preventDefault();
 
-<form id="data-form">
-  <label>Product Name</label>
-  <input type="text" name="Product Name">
+      const formData = new FormData(this);
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbyM_8DF9mjGvwCNGeQC7XrbhFjm8aFiY3JQa6X2QkT2FbEOKxaz5GigeewPdmDVG76lxg/exec'; // paste your Apps Script web app URL
 
-  <label>Product Code</label>
-  <input type="text" name="Product Code">
-
-  <label>Item Names (comma separated)</label>
-  <input type="text" name="Item">
-
-  <label>Item Weights (comma separated)</label>
-  <input type="text" name="Weight" id="weights" oninput="calculateTotalWeight()">
-
-  <label>Total Weight (Auto Calculated)</label>
-  <input type="text" name="Total Weight" id="totalWeight" readonly>
-
-  <label>Pantone Code</label>
-  <input type="text" name="Pantone Code">
-
-  <label>Pantone Colour</label>
-  <input type="text" name="Pantone Colour">
-
-  <label>RAL Code</label>
-  <input type="text" name="RAL Code">
-
-  <label>RAL Colour</label>
-  <input type="text" name="RAL Colour">
-
-  <label>Application</label>
-  <input type="text" name="Application">
-
-  <label>Additional Information</label>
-  <textarea name="Additional Information"></textarea>
-
-  <button type="submit" class="submit-btn">Submit</button>
-</form>
-
-<script>
-  const form = document.getElementById("data-form");
-
-  function calculateTotalWeight() {
-    const weightInput = document.getElementById("weights").value;
-    const weights = weightInput.split(',')
-      .map(w => parseFloat(w.trim()))
-      .filter(w => !isNaN(w));
-    const total = weights.reduce((sum, val) => sum + val, 0);
-    document.getElementById("totalWeight").value = total.toFixed(2);
-  }
-
-  form.addEventListener("submit", function(e) {
-    e.preventDefault();
-
-    // Recalculate total weight before submission
-    calculateTotalWeight();
-
-    const formData = new FormData(form);
-
-    fetch("https://script.google.com/macros/s/AKfycbzN82isJr6yXq1-JHaM73RW0k2scHXfPzJozOf-Dj3jYdGEEzj-5IqImjsW0wuswU2Iaw/exec", {
-      method: "POST",
-      body: formData
-    })
-    .then(res => res.text())
-    .then(data => {
-      alert("✅ Form submitted successfully!");
-      form.reset();
-      document.getElementById("totalWeight").value = "";
-    })
-    .catch(error => {
-      console.error("Submission Error:", error);
-      alert("❌ Submission failed. Check Google Script deployment.");
+      fetch(scriptURL, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => alert("Submitted successfully!"))
+      .catch(error => alert("Error!" + error.message));
     });
-  });
-</script>
-
+  </script>
 </body>
 </html>
