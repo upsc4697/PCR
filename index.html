@@ -2,10 +2,19 @@
 <html>
 <head>
   <title>Product Entry Form</title>
+  <style>
+    body { font-family: Arial; max-width: 500px; margin: auto; }
+    input, textarea { width: 100%; margin: 8px 0; padding: 8px; }
+    .itemRow { display: flex; gap: 10px; margin-bottom: 8px; }
+    .itemRow input { flex: 1; }
+    button { padding: 10px 15px; }
+  </style>
 </head>
 <body>
+
+  <h2>Product Entry Form</h2>
   <form id="productForm">
-    <input name="product" placeholder="Product Name" required><br>
+    <input name="product" placeholder="Product Name" required>
 
     <div id="items">
       <div class="itemRow">
@@ -16,10 +25,10 @@
 
     <button type="button" onclick="addRow()">+ Add More Items</button><br><br>
 
-    <input name="pantone" placeholder="Pantone"><br>
-    <input name="ral" placeholder="RAL"><br>
-    <input name="application" placeholder="Application"><br>
-    <textarea name="additional" placeholder="Additional Information"></textarea><br>
+    <input name="pantone" placeholder="Pantone">
+    <input name="ral" placeholder="RAL">
+    <input name="application" placeholder="Application">
+    <textarea name="additional" placeholder="Additional Information"></textarea>
 
     <button type="submit">Submit</button>
   </form>
@@ -59,12 +68,13 @@
       data.append('application', application);
       data.append('additional', additional);
 
-      const scriptURL = 'YOUR_SCRIPT_URL_HERE';
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbwmMuQD2g_rRBMCLZnX_tEKhzMM37fOPspQyFc96nUebVVZ1q-q_hOB86CByEuYLu8o-A/exec';
 
       fetch(scriptURL, { method: 'POST', body: data })
         .then(response => alert("Submitted Successfully!"))
         .catch(error => alert("Error: " + error.message));
     });
   </script>
+
 </body>
 </html>
