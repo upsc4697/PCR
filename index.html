@@ -1,29 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Submit to Google Sheets</title>
+  <title>Product Entry Form</title>
 </head>
 <body>
-  <form id="myForm">
-    <input name="name" placeholder="Your Name" required /><br />
-    <input name="email" type="email" placeholder="Your Email" required /><br />
-    <textarea name="message" placeholder="Your Message"></textarea><br />
+  <form id="productForm">
+    <input name="product" placeholder="Product Name" required><br>
+
+    <div id="items">
+      <div class="itemRow">
+        <input name="item" placeholder="Item" required>
+        <input name="weight" type="number" placeholder="Weight" required>
+      </div>
+    </div>
+
+    <button type="button" onclick="addRow()">+ Add More Items</button><br><br>
+
+    <input name="pantone" placeholder="Pantone"><br>
+    <input name="ral" placeholder="RAL"><br>
+    <input name="application" placeholder="Application"><br>
+    <textarea name="additional" placeholder="Additional Information"></textarea><br>
+
     <button type="submit">Submit</button>
   </form>
 
   <script>
-    document.getElementById('myForm').addEventListener('submit', function(e) {
+    function addRow() {
+      const div = document.createElement('div');
+      div.className = 'itemRow';
+      div.innerHTML = `
+        <input name="item" placeholder="Item" required>
+        <input name="weight" type="number" placeholder="Weight" required>
+      `;
+      document.getElementById('items').appendChild(div);
+    }
+
+    document.getElementById('productForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
-      const formData = new FormData(this);
-      const scriptURL = 'https://script.google.com/macros/s/AKfycbyM_8DF9mjGvwCNGeQC7XrbhFjm8aFiY3JQa6X2QkT2FbEOKxaz5GigeewPdmDVG76lxg/exec'; // paste your Apps Script web app URL
+      const form = e.target;
+      const formData = new FormData(form);
 
-      fetch(scriptURL, {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => alert("Submitted successfully!"))
-      .catch(error => alert("Error!" + error.message));
+      const product = formData.get('product');
+      const pantone = formData.get('pantone');
+      const ral = formData.get('ral');
+      const application = formData.get('application');
+      const additional = formData.get('additional');
+
+      const items = Array.from(document.getElementsByName('item')).map(input => input.value);
+      const weights = Array.from(document.getElementsByName('weight')).map(input => input.value);
+
+      const data = new FormData();
+      data.append('product', product);
+      data.append('items', JSON.stringify(items));
+      data.append('weights', JSON.stringify(weights));
+      data.append('pantone', pantone);
+      data.append('ral', ral);
+      data.append('application', application);
+      data.append('additional', additional);
+
+      const scriptURL = 'YOUR_SCRIPT_URL_HERE';
+
+      fetch(scriptURL, { method: 'POST', body: data })
+        .then(response => alert("Submitted Successfully!"))
+        .catch(error => alert("Error: " + error.message));
     });
   </script>
 </body>
